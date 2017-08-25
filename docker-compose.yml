@@ -1,0 +1,30 @@
+version: '3'
+services:
+  mlr_keycloak_db:
+    image: mysql
+    build:
+      context: .
+    environment:
+      - MYSQL_DATABASE=${KEYCLOAK_DB_NAME}
+      - MYSQL_USER=${KEYCLOAK_DB_USER}
+      - MYSQL_PASSWORD=${KEYCLOAK_DB_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${KEYCLOAK_DB_ROOT_PASSWORD}
+    ports:
+      - "3306:3306"
+    container_name: mlr_keycloak_db
+  mlr_keycloak:
+    build:
+      context: .
+    environment:
+      - MYSQL_DATABASE=${KEYCLOAK_DB_NAME}
+      - MYSQL_USERNAME=${KEYCLOAK_DB_USER}
+      - MYSQL_PASSWORD=${KEYCLOAK_DB_PASSWORD}
+      - MYSQL_PORT_3306_TCP_ADDR=${KEYCLOAK_DB_HOST}
+      - MYSQL_PORT_3306_TCP_PORT=${KEYCLOAK_DB_PORT}
+      - KEYCLOAK_USER=${KEYCLOAK_ADMIN_USER}
+      - KEYCLOAK_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+    ports:
+      - "8081:8080"
+    depends_on:
+      mlr_keycloak_db
+    container_name: mlr_keycloak
