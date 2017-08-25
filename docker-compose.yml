@@ -10,8 +10,8 @@ services:
       - MYSQL_PASSWORD=${KEYCLOAK_DB_PASSWORD}
       - MYSQL_ROOT_PASSWORD=${KEYCLOAK_DB_ROOT_PASSWORD}
     ports:
-      - "3306:3306"
-    container_name: mlr_keycloak_db
+      - "${KEYCLOAK_DB_PORT}:3306"
+    container_name: wma_keycloak_db
   mlr_keycloak:
     build:
       context: .
@@ -24,7 +24,7 @@ services:
       - KEYCLOAK_USER=${KEYCLOAK_ADMIN_USER}
       - KEYCLOAK_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
     ports:
-      - "8081:8080"
+      - "${KEYCLOAK_APP_PORT}:8080"
     depends_on:
-      mlr_keycloak_db
-    container_name: mlr_keycloak
+      wma_keycloak_db
+    container_name: wma_keycloak
