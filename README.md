@@ -68,7 +68,7 @@ Default Docker files and Configuration for WMA Instances of Keycloak
 
     ```docker service create --name keycloak -p 8080:8080 --config src=<config name> target="/opt/jboss/keycloak/mlr-keycloak-config.json" --env-file .env <docker registry host>:<docker registry port>/wma_keycloak```
 
-9. In a browser navigate to: `<Keycloak Container IP>:<KEYCLOAK_APP_PORT>/auth` and login to the administration console using the `KEYCLOAK_ADMIN_USER` and `KEYCLOAK_ADMIN_PASSWORD` credentials.
+9. In a browser navigate to: `<Keycloak Container IP>:<KEYCLOAK_APP_PORT>/auth` and login to the administration console using the `KEYCLOAK_USER` and `KEYCLOAK_PASSWORD` credentials you provided in the `.env` file.
 
 ## Usage Notes
 
