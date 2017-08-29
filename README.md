@@ -58,17 +58,17 @@ Default Docker files and Configuration for WMA Instances of Keycloak
 
 5. Run `docker-compose push` to push the WMA Keycloak docker image to the registry specified in the `.env` file.
 
-6. Copy the `.env` file and your pre-exported keycloak configuration JSON file (the included exmaple JSON file is `wma-keycloak-configuration.json`) to your swarm manager. This can be done using the following command (if using docker machine): `docker-machine scp <file> <manager machine name>:<destination file path with file name>`
+6. Copy the `.env` file and your pre-exported keycloak configuration JSON file (the included exmaple JSON file is `wma-keycloak-config.json`) to your swarm manager. This can be done using the following command (if using docker machine): `docker-machine scp <file> <manager machine name>:<destination file path with file name>`
 
 7. If you are using docker-machine activate your swarm manager machine, otherwise SSH into your swarm manager machine.
 
 8. Create a docker config object based on your exported keycloak configuration file by running `docker config create <name> <exported keycloak json file>`
 
-8. Create the Keycloak service that is exposed on port 8080 by running the following command from within the direcotry that you copied the `.env` file and exported keycloak JSON file to: 
+9. Create the Keycloak service that is exposed on port 8080 by running the following command from within the direcotry that you copied the `.env` file and exported keycloak JSON file to: 
 
-    ```docker service create --name keycloak -p 8080:8080 --config src=<config name> target="/opt/jboss/keycloak/mlr-keycloak-config.json" --env-file .env <docker registry host>:<docker registry port>/wma_keycloak```
+    ```docker service create --name keycloak -p 8080:8080 --config src=<config name> target="/opt/jboss/keycloak/wma-keycloak-config.json" --env-file .env <docker registry host>:<docker registry port>/wma_keycloak```
 
-9. In a browser navigate to: `<Keycloak Container IP>:<KEYCLOAK_APP_PORT>/auth` and login to the administration console using the `KEYCLOAK_USER` and `KEYCLOAK_PASSWORD` credentials you provided in the `.env` file.
+10. In a browser navigate to: `<Keycloak Container IP>:<KEYCLOAK_APP_PORT>/auth` and login to the administration console using the `KEYCLOAK_USER` and `KEYCLOAK_PASSWORD` credentials you provided in the `.env` file.
 
 ## Usage Notes
 
