@@ -1,0 +1,14 @@
+version: '3'
+services:
+  wma_keycloak_db:
+    image: mysql
+    build:
+      context: .
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "${MYSQL_PORT_3306_TCP_PORT}:3306"
+    container_name: wma_keycloak_db
