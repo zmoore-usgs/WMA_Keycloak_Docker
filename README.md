@@ -11,7 +11,7 @@ Default Docker files and Configuration for WMA Instances of Keycloak
 
 2. SSH into your docker swarm maanger machine by running `docker-machine ssh <manager machine name>`
 
-3. Create a new Docker Registry service on your swarm (images that are to-be deployed to a swarm cluster must be stored within a docker registry in order for the swarm to pull them) by running: `docker service create --name registory --publish 5000:5000 registry:2`
+3. Create a new Docker Registry service on your swarm (images that are to-be deployed to a swarm cluster must be stored within a docker registry in order for the swarm to pull them) by running: `docker service create --name registry --publish 5000:5000 registry:2`
 
 4. In order to push and pull images to and from your private registry it must be trsuted by your swarm manager. To do this edit the boot2docker profile by running `sudo vi /var/lib/boot2docker/profile` and adding `--insecure-registry <your docker swarm manager machine IP>:5000` as a new line in the `EXTRA_ARGS` section at the top of the file. After editing your `profile` file should look similar to this: 
 
@@ -38,7 +38,7 @@ Default Docker files and Configuration for WMA Instances of Keycloak
 
     ```
     MYSQL_DATABASE=keycloak
-    MYSQL_USERNAME=keycloak
+    MYSQL_USER=keycloak
     MYSQL_PASSWORD=password
     MYSQL_ROOT_PASSWORD=root_password
     MYSQL_PORT_3306_TCP_ADDR=192.168.99.100
@@ -78,7 +78,7 @@ The docker file does *not* use currently use docker networking to link these con
 - MYSQL_DATABASE
     - The name of the database to create and connect to within MySQL
 
-- MYSQL_USERNAME
+- MYSQL_USER
     - The username to use when connecting to the MySQL database
 
 - MYSQL_PASSWORD

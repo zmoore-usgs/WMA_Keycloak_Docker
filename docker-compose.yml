@@ -1,11 +1,11 @@
-version: '3'
+version: '3.2'
 services:
   wma_keycloak:
     image: ${DOCKER_REGISTRY_HOST}:${DOCKER_REGISTRY_PORT}/wma_keycloak
     build: .
     environment:
       - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_USERNAME=${MYSQL_USERNAME}
+      - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_PORT_3306_TCP_ADDR=${MYSQL_PORT_3306_TCP_ADDR}
       - MYSQL_PORT_3306_TCP_PORT=${MYSQL_PORT_3306_TCP_PORT}
