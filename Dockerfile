@@ -1,6 +1,6 @@
 FROM jboss/keycloak-mysql:latest
 
-ADD mlr-keycloak-config.json /opt/jboss/keycloak/
+ADD wma-keycloak-config.json /opt/jboss/keycloak/
 
 ENTRYPOINT [ "/opt/jboss/docker-entrypoint.sh" ]
 
