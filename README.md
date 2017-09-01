@@ -53,13 +53,13 @@ When it builds this docker file does a curl to pull the specified version of key
 
 2. Open a bash shell (on Windows I use the Docker Quickstart Terminal from Docker Toolbox running through Git Bash) and navigate to the project root directory.
 
-3. Setup a mysql database that is accessible by your docker swarm. This can be done using the included docker compose file `keycloak-db.yml`. This container can be started using `docker-compose -f keycloak-db.yml up`. Note that this will use the environment variables that you defined in the `.env` file to create the database, user, root user, and associated passwords. Once this database is created you may need to update the mysql address and port values in your `.env` file so that Keycloak can connect to it.
+3. Copy the `.env` file and your pre-exported keycloak configuration JSON file (the included exmaple JSON file is `wma-keycloak-config.json`) to your swarm manager. This can be done using the following command (if using docker machine): `docker-machine scp <file> <manager machine name>:<destination file path with file name>`
 
-4. Run `docker-compose build` to build the WMA Keycloak docker image
+4. Setup a mysql database that is accessible by your docker swarm. This can be done using the included docker compose file `keycloak-db.yml`. This container can be started as a service in the swarm using `docker stack deploy -c keycloak-db.yml keycloak_db`. Note that this will use the environment variables that you defined in the `.env` file to create the database, user, root user, and associated passwords. Once this database is created you may need to update the mysql address and port values in your `.env` file so that Keycloak can connect to it.
 
-5. Run `docker-compose push` to push the WMA Keycloak docker image to the registry specified in the `.env` file.
+5. Run `docker-compose build` to build the WMA Keycloak docker image
 
-6. Copy the `.env` file and your pre-exported keycloak configuration JSON file (the included exmaple JSON file is `wma-keycloak-config.json`) to your swarm manager. This can be done using the following command (if using docker machine): `docker-machine scp <file> <manager machine name>:<destination file path with file name>`
+6. Run `docker-compose push` to push the WMA Keycloak docker image to the registry specified in the `.env` file.
 
 7. If you are using docker-machine activate your swarm manager machine, otherwise SSH into your swarm manager machine.
 
@@ -67,7 +67,7 @@ When it builds this docker file does a curl to pull the specified version of key
 
 9. Create the Keycloak service that is exposed on port 8080 by running the following command from within the direcotry that you copied the `.env` file and exported keycloak JSON file to: 
 
-    ```docker service create --name keycloak -p 8080:8080 --config src=<config name> target="/opt/jboss/keycloak/wma-keycloak-config.json" --env-file .env <docker registry host>:<docker registry port>/wma_keycloak```
+    ```docker stack deploy -c docker-compose.yml wma_keycloak```
 
 10. In a browser navigate to: `<Keycloak Container IP>:<KEYCLOAK_APP_PORT>/auth` and login to the administration console using the `KEYCLOAK_USER` and `KEYCLOAK_PASSWORD` credentials you provided in the `.env` file.
 
@@ -78,12 +78,14 @@ The docker file does *not* use currently use docker networking to link these con
 ## Environment Variables
 - MYSQL_DATABASE
     - The name of the database to create and connect to within MySQL.
+    - Note this is used in both the database compose file to create the database and the keycloak app compose file to connect keycloak to the database.
 
 - MYSQL_PORT_3306_TCP_ADDR
     - The host address of the MySQL database to connect to.
 
 - MYSQL_PORT_3306_TCP_PORT
     - The host port of the MySQL database to connect to.
+    - Note this is used in both the database compose file to create the database listener and the keycloak app compose file to connect keycloak to the database.
 
 - KEYCLOAK_PORT
     - The port to expose the keycloak application on.
@@ -112,6 +114,9 @@ The docker file does *not* use currently use docker networking to link these con
 
 - keycloak_password
     - The password to use for the keycloak admin account.
+
+- keycloak_config
+    - An exported Keycloak configuration JSON file to be imported into the keycloak instances created in the swarm.
 
 ## Below Sections Taken From https://github.com/jboss-dockerfiles/keycloak/tree/master/server
 

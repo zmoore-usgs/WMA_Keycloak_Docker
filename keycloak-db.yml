@@ -1,14 +1,25 @@
-version: '3'
+version: '3.2'
 services:
   wma_keycloak_db:
     image: mysql
     build:
       context: .
+    secrets:
+      - mysql_user
+      - mysql_password
+      - mysql_root_password
     environment:
       - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_USER_FILE=/run/secrets/mysql_user
+      - MYSQL_PASSWORD_FILE=/run/escrets/mysql_password
+      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/mysql_root_password
     ports:
       - "${MYSQL_PORT_3306_TCP_PORT}:3306"
     container_name: wma_keycloak_db
+secrets:
+  mysql_user:
+    external: true
+  mysql_password:
+    external: true
+  mysql_root_password:
+    external: true
