@@ -1,16 +1,34 @@
 version: '3.2'
 services:
   wma_keycloak:
-    image: ${DOCKER_REGISTRY_HOST}:${DOCKER_REGISTRY_PORT}/wma_keycloak
+    image: ${DOCKER_REGISTRY_HOST}:${DOCKER_REGISTRY_PORT}/wma_keycloak:latest
     build: .
+    secrets:
+      - mysql_user
+      - mysql_password
+      - keycloak_user
+      - keycloak_password
+      - keycloak_config
     environment:
       - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_PORT_3306_TCP_ADDR=${MYSQL_PORT_3306_TCP_ADDR}
       - MYSQL_PORT_3306_TCP_PORT=${MYSQL_PORT_3306_TCP_PORT}
-      - KEYCLOAK_USER=${KEYCLOAK_USER}
-      - KEYCLOAK_PASSWORD=${KEYCLOAK_PASSWORD}
+      - MYSQL_USER_FILE=/run/secrets/mysql_user
+      - MYSQL_PASSWORD_FILE=/run/secrets/mysql_password
+      - KEYCLOAK_USER_FILE=/run/secrets/keycloak_user
+      - KEYCLOAK_PASSWORD_FILE=/run/secrets/keycloak_password
+      - KEYCLOAK_CONFIG_FILE=/run/secrets/keycloak_config
     ports:
       - "${KEYCLOAK_PORT}:8080"
     container_name: wma_keycloak
+secrets:
+  mysql_user:
+    external: true
+  mysql_password:
+    external: true
+  keycloak_user:
+    external: true
+  keycloak_password:
+    external: true
+  keycloak_config:
+    external: true

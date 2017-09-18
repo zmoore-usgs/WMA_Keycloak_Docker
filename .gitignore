@@ -1,3 +1,6 @@
 *.env
 .idea
 /.project
+/secrets
+/ssl/*.crt
+/ssl/*.cert
