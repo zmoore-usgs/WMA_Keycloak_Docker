@@ -12,7 +12,7 @@ RUN yum install -y epel-release && yum install -y jq && yum clean all
 USER jboss
 
 #DOI Root Cert
-ADD ssl/root.crt /opt/jboss/ssl/root.crt 
+RUN cd /opt/jboss/ && mkdir ssl && cd ssl && curl -o root.crt http://sslhelp.doi.net/docs/DOIRootCA2.cer
 
 RUN cd /opt/jboss/ && curl -L https://downloads.jboss.org/keycloak/$KEYCLOAK_VERSION/keycloak-$KEYCLOAK_VERSION.tar.gz --cacert /opt/jboss/ssl/root.crt | tar zx && mv /opt/jboss/keycloak-$KEYCLOAK_VERSION /opt/jboss/keycloak
 
