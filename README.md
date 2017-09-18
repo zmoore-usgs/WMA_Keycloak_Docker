@@ -5,6 +5,8 @@ Based on Jboss Keycloak Server Base Image: https://github.com/jboss-dockerfiles/
 
 ## Local Usage
 
+NOTE: If you are only planning on using a loacl keycloak instance for testing and development purposes and you DO NOT need to use swarm capabilities then it is likely that all you will need to do is create a running instance of the basic keycloak image, rather than the WMA verison. Instructions for setting up a basic keycloak instance through Docker can be found here: https://hub.docker.com/r/jboss/keycloak-mysql/ 
+
 ### Setup Docker Swarm (Using Docker Machine)
 
 1. Choose an existing or create a new docker machine to serve as your swarm manager and on it run `docker swarm init`
@@ -20,7 +22,7 @@ Based on Jboss Keycloak Server Base Image: https://github.com/jboss-dockerfiles/
     ```
     EXTRA_ARGS='
     --label provider=virtualbox
-    --insecure-registry 192.168.99.101:5000
+    --insecure-registry <docker-swarm machine IP>:5000
     '
     CACERT=/var/lib/boot2docker/ca.pem
     DOCKER_HOST='-H tcp://0.0.0.0:2376'
@@ -30,7 +32,7 @@ Based on Jboss Keycloak Server Base Image: https://github.com/jboss-dockerfiles/
     SERVERCERT=/var/lib/boot2docker/server.pem
     ```
 
-5. Logout of the docker machine you SSH'd into, navigate to the project root directory, and follow the `Usage` steps below. 
+5. Logout of the docker machine, restart the docker machine you SSH'd into, navigate to the project root directory, and follow the `Usage` steps below. 
 
     #### NOTE: If you are not using your default docker machine as your docker swarm manager then you will potentially run into a security error when trying to push built images to your registry. In order to avoid this you should either repeat step 4 on your default machine, or you should have your manager become your active machine when building the project. You can switch your active machine with the following command: `eval $(docker-machine env <machine name to activate>)` 
 
@@ -44,10 +46,10 @@ When it builds this docker file does a curl to pull the specified version of key
 
     ```
     MYSQL_DATABASE=keycloak
-    MYSQL_PORT_3306_TCP_ADDR=192.168.99.100
+    MYSQL_PORT_3306_TCP_ADDR=<mysql database host IP>
     MYSQL_PORT_3306_TCP_PORT=3306
     KEYCLOAK_PORT=8080
-    DOCKER_REGISTRY_HOST=192.168.99.101
+    DOCKER_REGISTRY_HOST=<docker swarm manager machine IP>
     DOCKER_REGISTRY_PORT=5000
     ```
 
@@ -55,21 +57,23 @@ When it builds this docker file does a curl to pull the specified version of key
 
 3. Copy the `.env` file and your pre-exported keycloak configuration JSON file (the included exmaple JSON file is `wma-keycloak-config.json`) to your swarm manager. This can be done using the following command (if using docker machine): `docker-machine scp <file> <manager machine name>:<destination file path with file name>`
 
-4. Setup a mysql database that is accessible by your docker swarm. This can be done using the included docker compose file `keycloak-db.yml`. This container can be started as a service in the swarm using `docker stack deploy -c keycloak-db.yml keycloak_db`. Note that this will use the environment variables that you defined in the `.env` file to create the database, user, root user, and associated passwords. Once this database is created you may need to update the mysql address and port values in your `.env` file so that Keycloak can connect to it.
+4. SSH Into your Docker Swarm manager and create Docker Secrets for each of the secrets listed in the `Secrets` section below. Secrets can be created from a file using `docker secret create <name> <file>` or from STDIN using `echo "MySecretText" | docker secret create <name> -`.
 
-5. Run `docker-compose build` to build the WMA Keycloak docker image
+5. Setup a mysql database that is accessible by your docker swarm. This container can be started as a service from the swarm manager using `docker service create --name keycloak_db --publish 3306:3306 --secret mysql_user --secret mysql_password --secret mysql_root_password --env MYSQL_DATABASE=keycloak --env MYSQL_USER_FILE=/run/secrets/mysql_user --env MYSQL_PASSWORD_FILE=/run/secrets/mysql_password --env MYSQL_ROOT_PASSWORD_FILE=/run/secrets/mysql_root_password`. Note that this will use the environment variables that you defined in the `.env` file and docker secrets to create the database, user, root user, and associated passwords. Once this database is created you may need to update the mysql address and port values in your `.env` file so that Keycloak can connect to it.
 
-6. Run `docker-compose push` to push the WMA Keycloak docker image to the registry specified in the `.env` file.
+6. Log out of your docker swarm manager, back to the project root directory
 
-7. If you are using docker-machine activate your swarm manager machine, otherwise SSH into your swarm manager machine.
+7. Run `docker build -t wma_keycloak .` to build the WMA Keycloak docker image
 
-8. Create Docker Secrets for each of the secrets listed in the `Secrets` section. Secrets can be created from a file using `docker secret create <name> <file>` or from STDIN using `echo "MySecretText" | docker secret create <name> -`.
+8. Run `docker tag wma_keycloak <docker registry address>:<docker registry port>/wma_keycloak`
 
-9. Create the Keycloak service that is exposed on port 8080 by running the following command from within the direcotry that you copied the `.env` file and exported keycloak JSON file to: 
+8. Run `docker push <docker registry address>:<docker registry port>/wma_keycloak` to push the WMA Keycloak docker image to the registry specifiedby the tag.
 
-    ```docker stack deploy -c docker-compose.yml wma_keycloak```
+9. SSH Into your Docker Swarm manager and create the Keycloak service that is exposed on port 8080 by running the following command from within the direcotry that you copied the `.env` file and the exported keycloak JSON file to: 
 
-10. In a browser navigate to: `<Keycloak Container IP>:<KEYCLOAK_APP_PORT>/auth` and login to the administration console using the `KEYCLOAK_USER` and `KEYCLOAK_PASSWORD` credentials you provided in the `.env` file.
+    ```docker service create --name keycloak --publish 8080:8080 --secret mysql_user --secret mysql_password --secret keycloak_user --secret keycloak_password --secret keycloak_config --env MYSQL_DATABASE=keycloak --env MYSQL_PORT_3306_TCP_ADDR=192.168.99.102 --env MYSQL_PORT_3306_TCP_PORT=3306 --env MYSQL_USER_FILE=/run/secrets/mysql_user --env MYSQL_PASSWORD_FILE=/run/secrets/mysql_password --env KEYCLOAK_USER_FILE=/run/secrets/keycloak_user --env KEYCLOAK_PASSWORD_FILE=/run/secrets/keycloak_password --env KEYCLOAK_CONFIG_FILE=/run/secrets/keycloak_config <docker swarm manager IP>:5000/wma_keycloak```
+
+10. In a browser navigate to: `<Keycloak Container IP>:<KEYCLOAK_APP_PORT>/auth` and login to the administration console using the `KEYCLOAK_USER` and `KEYCLOAK_PASSWORD` credentials you provided in the docker secrets.
 
 ## Usage Notes
 
