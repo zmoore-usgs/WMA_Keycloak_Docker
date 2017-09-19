@@ -63,7 +63,7 @@ When it builds this docker file does a curl to pull the specified version of key
 
 6. Log out of your docker swarm manager, back to the project root directory
 
-7. Run `docker build -t wma_keycloak .` to build the WMA Keycloak docker image
+7. Run `docker build --build-arg USE_EXTERNAL_CERT=true -t wma_keycloak .` to build the WMA Keycloak docker image. Note that the build argument USE_EXTERNAL_CERT defines wheter or not the build process should inject the DOI Root Cert into the container during the build process. This is necessary when builds are being done on a machine that uses the DOI Root Cert. If the build arg is not preset then it defaults to false and the standard cert bundle is used.
 
 8. Run `docker tag wma_keycloak <docker registry address>:<docker registry port>/wma_keycloak`
 
