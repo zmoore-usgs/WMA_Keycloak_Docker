@@ -5,6 +5,7 @@ ENV KEYCLOAK_VERSION 3.3.0.CR1
 # ensuring clean shutdown when container is stopped.
 ENV LAUNCH_JBOSS_IN_BACKGROUND 1
 ENV PROXY_ADDRESS_FORWARDING false
+ARG USE_EXTERNAL_CERT=false
 USER root
 
 RUN yum install -y epel-release && yum install -y jq && yum clean all
@@ -12,9 +13,11 @@ RUN yum install -y epel-release && yum install -y jq && yum clean all
 USER jboss
 
 #DOI Root Cert
-RUN cd /opt/jboss/ && mkdir ssl && cd ssl && curl -o root.crt http://sslhelp.doi.net/docs/DOIRootCA2.cer
+RUN if [ $USE_EXTERNAL_CERT = true ] ; then cd /opt/jboss/ && mkdir ssl && cd ssl && curl -o root.crt http://sslhelp.doi.net/docs/DOIRootCA2.cer ; fi
 
-RUN cd /opt/jboss/ && curl -L https://downloads.jboss.org/keycloak/$KEYCLOAK_VERSION/keycloak-$KEYCLOAK_VERSION.tar.gz --cacert /opt/jboss/ssl/root.crt | tar zx && mv /opt/jboss/keycloak-$KEYCLOAK_VERSION /opt/jboss/keycloak
+RUN if [ $USE_EXTERNAL_CERT = true ] ; then cd /opt/jboss/ && curl -L https://downloads.jboss.org/keycloak/$KEYCLOAK_VERSION/keycloak-$KEYCLOAK_VERSION.tar.gz --cacert /opt/jboss/ssl/root.crt | tar zx && mv /opt/jboss/keycloak-$KEYCLOAK_VERSION /opt/jboss/keycloak ; fi
+
+RUN if [ $USE_EXTERNAL_CERT != true ] ; then cd /opt/jboss/ && curl -L https://downloads.jboss.org/keycloak/$KEYCLOAK_VERSION/keycloak-$KEYCLOAK_VERSION.tar.gz | tar zx && mv /opt/jboss/keycloak-$KEYCLOAK_VERSION /opt/jboss/keycloak ; fi
 
 ADD docker-entrypoint.sh /opt/jboss/
 
